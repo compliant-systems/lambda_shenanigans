@@ -15,19 +15,29 @@
 /*
 The key abstraction : list 
 */
-auto list = [](auto... xs) {
-    return [=](auto callable_) {
+auto list = [](auto... xs) constexpr
+{
+    return [=](auto callable_) constexpr
+    {
         return callable_(xs...);
     };
 };
 
+// this is perhaps questionable
+using allowed_list_processor_type = decltype(list);
+
 /*
+
+this is not elegant
+
 return result of a call to first argument
 or if no args are give return tuple of 
 arguments originaly given
 */
-auto listx = [](auto... xs) {
-    return [=](auto... args_) {
+auto listx = [](auto... xs) constexpr
+{
+    return [=](auto... args_) constexpr
+    {
         if constexpr (sizeof...(args_))
         {
             auto callables = {args_...};
@@ -41,11 +51,12 @@ auto listx = [](auto... xs) {
 };
 /*
 take the first element from list argument
-return list with one element
+return list with that one element
 */
-auto head = [](auto list_) {
+auto head = [](auto list_) constexpr
+{
     return list_(
-        [=](auto first_, auto... args) {
+        [=](auto first_, auto... args) constexpr {
             return list(first_);
         });
 };
@@ -53,17 +64,29 @@ auto head = [](auto list_) {
 take all but the first element from list argument
 return list with them elements
 */
-auto tail = [](auto list_) {
+auto tail = [](auto list_) constexpr
+{
     return list_(
-        [=](auto first_, auto... args) {
+        [=](auto first_, auto... args) constexpr {
             return list(args...);
         });
 };
+/*
+return size of the list
+*/
+auto size = [](auto list_) constexpr
+{
+    return list_(
+        [=](auto... args) constexpr {
+            return sizeof...(args);
+        });
+};
 /* make tuple from a list */
-auto listuple = [&](auto list_) {
+auto listuple = [&](auto list_) constexpr
+{
     //
     return list_(
-        [=](auto... args) {
+        [=](auto... args) constexpr {
             return std::make_tuple(args...);
         });
 };
@@ -72,10 +95,10 @@ auto listuple = [&](auto list_) {
 get first element from a list
 no tuple necessary
  */
-decltype(auto) list_first = [&](auto list_) {
+decltype(auto) list_first = [&](auto list_) constexpr {
     //
     return list_(
-        [=](auto first_, auto... args) {
+        [=](auto first_, auto... args) constexpr {
             return (first_);
         });
 };
@@ -83,17 +106,18 @@ decltype(auto) list_first = [&](auto list_) {
 ///--------------------------------------------------
 static int worker(int, char **)
 {
-    auto L1 = list("HEAD", true, 3.14, "TAIL");
-    auto H = head(L1);
-    auto T = tail(L1);
-    auto tupson = listuple(L1);
-    auto first = std::get<0>(tupson);
+    constexpr auto L1 = list("HEAD", true, 3.14, "TAIL");
+    constexpr auto H = head(L1);
+    constexpr auto S = size(H);
+    constexpr auto T = tail(L1);
+    constexpr auto tupson = listuple(L1);
+    constexpr auto first = std::get<0>(tupson);
 
-    auto firstico = list_first(L1);
+    constexpr auto firstico = list_first(L1);
 
-    auto LX = listx("HEAD", true, 3.14, "TAIL");
-    auto firston = LX();
-    auto first_2 = std::get<0>(firston);
+    constexpr auto LX = listx("HEAD", true, 3.14, "TAIL");
+    constexpr auto firston = LX();
+    constexpr auto first_2 = std::get<0>(firston);
 
     // auto tup = tupson();
 
