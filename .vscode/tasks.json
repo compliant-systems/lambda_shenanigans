@@ -1,0 +1,48 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "debug build",
+            "type": "shell",
+            "command": "cl.exe",
+            "args": [
+                "/std:c++17",
+                "/MDd",
+                "-D_HAS_EXCEPTIONS=0",
+                "/Zi",
+                "/Fe:",
+                "${workspaceFolder}/sample/sample_dbg.exe",
+                "${workspaceFolder}/sample/sample.cpp"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "release build",
+            "type": "shell",
+            "command": "cl.exe",
+            "args": [
+                "/std:c++17",
+                "/MDd",
+                "-D_HAS_EXCEPTIONS=0",
+                "/Fe:",
+                "${workspaceFolder}/sample/sample.exe",
+                "${workspaceFolder}/sample/sample.cpp"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
