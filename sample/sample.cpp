@@ -25,6 +25,8 @@ auto list = [](auto... xs) constexpr
 
 // this is perhaps questionable
 using allowed_list_processor_type = decltype(list);
+// and this too?
+constexpr auto empty_list = list();
 
 /*
 
@@ -95,13 +97,80 @@ auto listuple = [&](auto list_) constexpr
 get first element from a list
 no tuple necessary
  */
-decltype(auto) list_first = [&](auto list_) constexpr {
+decltype(auto) first_element = [&](auto list_) constexpr
+{
     //
     return list_(
         [=](auto first_, auto... args) constexpr {
             return (first_);
         });
 };
+
+auto nth_head = [&](unsigned idx_, auto list_) constexpr
+{
+    //
+    auto get_the_nth_head = [&](unsigned walker_, auto first, auto ... tail_) constexpr
+    {
+        if (walker_ == idx_)
+        {
+            return tail_;
+        }
+        else
+        {
+            return get_the_nth_head(walker_ + 1, tail_ ...);
+        }
+    };
+    //
+    return list_(
+        [=]( auto... args_) constexpr {
+            return get_the_nth_head(0, args_ ...);
+        });
+};
+
+/* 
+get nth element from a list
+no tuple necessary
+on error empty list is retuned
+ */
+// decltype(auto) nth_element = [&](unsigned idx_, auto list_)
+// {
+//     // helper
+//     auto get_the_nth_head = [&](unsigned counter_, auto tail_)
+//     {
+//         if (counter_ == idx_)
+//         {
+//             return head(tail_);
+//         }
+//         else
+//         {
+//             return (counter_ + 1, tail(tail_));
+//         }
+//     };
+//     //
+//     return list_(
+//         [=](auto first_, auto... args)  {
+//             // empty list
+//             if constexpr (size(list_) < 1)
+//             {
+//                 return list_;
+//             }
+//             // single element list
+//             else if constexpr (size(list_) < 2)
+//             {
+//                 // basically ignore the idx_
+//                 return first(list_);
+//             }
+//             // two or more elements
+//             else
+//             {
+//                 if (idx_ > size(list_))
+//                     return list(); // empty list
+//                 // get the heads until the nth element
+//                 auto nth_head = get_the_nth_head(0, list_);
+//                 return first_element(nth_head);
+//             }
+//         });
+// };
 
 ///--------------------------------------------------
 static int worker(int, char **)
@@ -113,11 +182,22 @@ static int worker(int, char **)
     constexpr auto tupson = listuple(L1);
     constexpr auto first = std::get<0>(tupson);
 
-    constexpr auto firstico = list_first(L1);
+    constexpr auto firstico = first_element(L1);
 
-    constexpr auto LX = listx("HEAD", true, 3.14, "TAIL");
-    constexpr auto firston = LX();
-    constexpr auto first_2 = std::get<0>(firston);
+    // empty list?
+    constexpr auto empty_list = list();
+    constexpr auto S0 = size(empty_list);
+    // does not compile
+    // constexpr auto empty_head = head(empty_list);
+
+    constexpr auto lonely_list = list(42);
+    constexpr auto H42 = head(lonely_list);
+
+    auto nth_ = nth_head(2, L1);
+
+    // constexpr auto LX = listx("HEAD", true, 3.14, "TAIL");
+    // constexpr auto firston = LX();
+    // constexpr auto first_2 = std::get<0>(firston);
 
     // auto tup = tupson();
 
